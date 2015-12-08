@@ -17,7 +17,7 @@ main.show();
 
 function itemgenerator(data, data_old){
 	var items = [];
-	for(var i = 0; i < data.notifications.lenght; i++) {
+	for(var i = 0; i < 10; i++) {
 		items.push({
 			title: data.notifications[i].subject, 
 			subtitle: data.notifications[i].description

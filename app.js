@@ -11,36 +11,53 @@ var main = new UI.Menu({
 	}]
 });
 
+function show(items, next){
+	console.log('show it');
+	items.unshift({title: 'Update', subtitle: 'check for News'});
+	if (next !== false){ items.push({title: 'Load more', subtitle: 'next page'});}
+	main.items(0, items);
+	console.log('fertig!');
+}
+
 function request(){
 		ajax({
 			url:'http://proxer.me/notifications?format=json&s=news&p=1',
 			type: 'json'
 		},
 		function(data) {
-			console.log('data_function');
-			var items = [];
-			for(var i = 0; i < 15; i++) {
-				items.push({
-					title: data.notifications[i].subject, 
-					subtitle: data.notifications[i].description
+			console.log('data_function - ' + data);
+			if(data.error != 0){
+				show([{title: 'Fehler', subtitle: data.msg }]);
+			} else {
+				var items = [];
+				for(var i = 0; i < 15; i++) {
+					items.push({
+						title: data.notifications[i].subject, 
+						subtitle: data.notifications[i].description
+					});
+				}
+				console.log(items + ' + ' + items.length);
+				show(items);
+
+				main.on('select', function(e) {
+					console.log(e.itemIndex);
+					if (e.itemIndex == 0){
+						request();
+					} else {
+						var card = new UI.Card();
+						card.title(items[e.itemIndex].title);
+						card.body(items[e.itemIndex].subtitle);
+						card.scrollable(true);
+						card.show();
+					}
 				});
 			}
-			console.log(items + ' + ' + items.length);
-			show(items);
 		},
 		function(error) {
 			console.log('rquest_error');
 			show([{title: 'No Connection', subtitle: '-> No News' }]);
 		}
 	);
-}
-
-function show(items){
-	console.log('show it');
-	items.push({title: 'Load more', subtitle: 'next page'});
-	items.unshift({title: 'Update', subtitle: 'check 4 News'});
-	main.items(0, items);
-	console.log('fertig!');
 }
 
 main.show();

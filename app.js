@@ -30,7 +30,7 @@ function request(){
 				show([{title: 'Fehler', subtitle: data.msg }]);
 			} else {
 				var items = [];
-				for(var i = 0; i < 15; i++) {
+				for(var i = 0; i < data.notifications.lenght; i++) {
 					items.push({
 						title: data.notifications[i].subject, 
 						subtitle: data.notifications[i].description
@@ -38,20 +38,21 @@ function request(){
 				}
 				console.log(items + ' + ' + items.length);
 				show(items);
-
-				main.on('select', function(e) {
-					console.log(e.itemIndex);
-					if (e.itemIndex == 0){
-						request();
-					} else {
-						var card = new UI.Card();
-						card.title(items[e.itemIndex].title);
-						card.body(items[e.itemIndex].subtitle);
-						card.scrollable(true);
-						card.show();
-					}
-				});
 			}
+			main.on('select', function(e) {
+				console.log(e.itemIndex);
+				if (e.itemIndex == 0){
+					console.log('updating');
+					show([{title: 'Updating...', subtitle: '4 test' }]);
+//					request();
+				} else if (data.error == 0) {
+					var card = new UI.Card();
+					card.title(items[e.itemIndex].title);
+					card.body(items[e.itemIndex].subtitle);
+					card.scrollable(true);
+					card.show();
+				}
+			});
 		},
 		function(error) {
 			console.log('rquest_error');
@@ -63,40 +64,3 @@ function request(){
 main.show();
 
 request();
-
-
-
-/*
-function itemgenerator(data, data_old){
-	var items = [];
-	for(var i = 0; i < data.notifications.lenght; i++) {
-		items.push({
-			title: data.notifications[i].subject, 
-			subtitle: data.notifications[i].description
-		});
-	}
-	if(data.notifications[0].subject != data_old){
-		return items;
-	}
-	else console.log("nichts neues");
-}
-
-
-			main.items(0, itemgenerator(data));
-
-			main.on('accelTap', function(e) {
-				var data_old = data.notifications[0].subject;
-				ajax({
-					url:'http://proxer.me/notifications?format=json&s=news&p=1',
-					type: 'json'
-				},function(data) {
-					main.items(0, itemgenerator(data, data_old));
-				});
-			});
-			main.on('select', function(e) {
-				var card = new UI.Card();
-				card.title(data.notifications[e.itemIndex].subject);
-				card.body(data.notifications[e.itemIndex].description);
-				card.scrollable(true);
-				card.show();
-			});*/

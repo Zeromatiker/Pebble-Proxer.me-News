@@ -13,8 +13,11 @@ var main = new UI.Menu({
 
 function show(items, next){
 	console.log('show it');
-	items.unshift({title: 'Update', subtitle: 'check for News'});
-	if (next !== false){ items.push({title: 'Load more', subtitle: 'next page'});}
+	if (next !== true){ 
+		items.unshift({title: 'Update', subtitle: 'check for News'});
+		items.push({title: 'Load more', subtitle: 'next page'});
+		console.log('next: ' + next);
+	}
 	main.items(0, items);
 	console.log('fertig!');
 }
@@ -25,8 +28,8 @@ function request(){
 			type: 'json'
 		},
 		function(data) {
-			console.log('data_function - ' + data);
-			if(data.error != 0){
+			console.log('data_function: ' + data);
+			if(data.error !== 0){			//=?
 				show([{title: 'Fehler', subtitle: data.msg }]);
 			} else {
 				var items = [];
@@ -36,16 +39,16 @@ function request(){
 						subtitle: data.notifications[i].description
 					});
 				}
-				console.log(items + ' + ' + items.length);
+				console.log(items + ' ; ' + items.length);
 				show(items);
 			}
 			main.on('select', function(e) {
 				console.log(e.itemIndex);
-				if (e.itemIndex == 0){
+				if (e.itemIndex === 0){			//=?
 					console.log('updating');
-					show([{title: 'Updating...', subtitle: '4 test' }]);
+					show([{title: 'Updating...', subtitle: '4 test' }], true);
 //					request();
-				} else if (data.error == 0) {
+				} else if (data.error === 0) {			//=?
 					var card = new UI.Card();
 					card.title(items[e.itemIndex].title);
 					card.body(items[e.itemIndex].subtitle);

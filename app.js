@@ -11,15 +11,14 @@ var main = new UI.Menu({
 	}]
 });
 
-function show(items, next){
-	console.log('show it');
-	if (next !== true){ 
-		items.unshift({title: 'Update', subtitle: 'check for News'});
-		items.push({title: 'Load more', subtitle: 'next page'});
-		console.log('next: ' + next);
+function show(items1, show_update){
+	console.log('show it, items1: ' + items1);
+	if (show_update !== true){
+		items1.unshift({title: 'Update', subtitle: 'check for News'});
+		console.log('next: ');
 	}
-	main.items(0, items);
-	console.log('fertig!');
+	main.items(0, items1);
+	console.log('fertig! geshowt');
 }
 
 function request(){
@@ -29,26 +28,35 @@ function request(){
 		},
 		function(data) {
 			console.log('data_function: ' + data);
-			if(data.error !== 0){			//=?
+			if(data.error !== 0){
 				show([{title: 'Fehler', subtitle: data.msg }]);
 			} else {
+				console.log(data.length);
+				console.log(data.notifications);
+				console.log(data.notifications.length);
+				console.log(data.notifications[0].subject);
+				console.log(data.notifications[0].length);
 				var items = [];
-				for(var i = 0; i < data.notifications.lenght; i++) {
+				for(var i = 0; i < data.notifications.lenght; i++){
+					console.log('run: ' + i);
 					items.push({
 						title: data.notifications[i].subject, 
 						subtitle: data.notifications[i].description
 					});
 				}
-				console.log(items + ' ; ' + items.length);
+				console.log(items.length + ' items: ' + items);
+				items.push({title: 'Load more', subtitle: 'next page'});
 				show(items);
 			}
 			main.on('select', function(e) {
 				console.log(e.itemIndex);
-				if (e.itemIndex === 0){			//=?
+				if (e.itemIndex === 0){
 					console.log('updating');
-					show([{title: 'Updating...', subtitle: '4 test' }], true);
+					show([{ title: 'Updating...', subtitle: '4 test' }], true);
 //					request();
-				} else if (data.error === 0) {			//=?
+				} else if (e.itemIndex == (items.length - 1)){
+					console.log('get new news');
+				} else if (data.error === 0) {
 					var card = new UI.Card();
 					card.title(items[e.itemIndex].title);
 					card.body(items[e.itemIndex].subtitle);
@@ -59,7 +67,7 @@ function request(){
 		},
 		function(error) {
 			console.log('rquest_error');
-			show([{title: 'No Connection', subtitle: '-> No News' }]);
+			show([{ title: 'No Connection', subtitle: '-> No News' }]);
 		}
 	);
 }

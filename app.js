@@ -27,17 +27,23 @@ function request(){
 			type: 'json'
 		},
 		function(data) {
-			console.log('data_function: ' + data);
-			if(data.error !== 0){
+			return data;
+		},
+		function(error) {
+			console.log('rquest_error');
+			show([{ title: 'No Connection', subtitle: '-> No News' }]);
+		}
+	);
+}
+
+main.show();
+
+var data = request();
+if(data.error !== 0){
 				show([{title: 'Fehler', subtitle: data.msg }]);
 			} else {
-				console.log(data.length);
-				console.log(data.notifications);
-				console.log(data.notifications.length);
-				console.log(data.notifications[0].subject);
-				console.log(data.notifications[0].length);
 				var items = [];
-				for(var i = 0; i < data.notifications.lenght; i++){
+				for(var i = 0; i < data.notifications.length; i++){
 					console.log('run: ' + i);
 					items.push({
 						title: data.notifications[i].subject, 
@@ -64,14 +70,5 @@ function request(){
 					card.show();
 				}
 			});
-		},
-		function(error) {
-			console.log('rquest_error');
-			show([{ title: 'No Connection', subtitle: '-> No News' }]);
-		}
-	);
-}
-
-main.show();
 
 request();

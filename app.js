@@ -1,63 +1,77 @@
 var UI = require('ui');
 var ajax = require('ajax');
-var Accel = require('ui/accel');
-var Vibe = require('ui/vibe');
 
 var main = new UI.Menu({
   sections: [{
     items: [{
       title: 'Proxer News',
       icon: 'images/menu_icon.png',
-	    subtitle: 'Loading News'
+	    subtitle: 'Loading...'
     }]
 	}]
 });
 
-main.show();
-
-function itemgenerator(data, data_old){
-	var items = [];
-	for(var i = 0; i < 10; i++) {
-		items.push({
-			title: data.notifications[i].subject, 
-			subtitle: data.notifications[i].description
-		});
+function show(items1, show_update){
+//	console.log('show it, items1: ' + items1);
+	if (show_update !== true){
+		items1.unshift({title: 'Update', subtitle: 'check for News'});
+//		console.log('next: ');
 	}
-	if(data.notifications[0].subject != data_old){
-		Vibe.vibrate('short');
-		return items;
-	}
-	else console.log("nichts neues");
+	main.items(0, items1);
+//	console.log('fertig! geshowt');
 }
 
-ajax({
-		url:'http://proxer.me/notifications?format=json&s=news&p=1',
-		type: 'json'
-	},
-	function(data) {
-		main.items(0, itemgenerator(data));
-		
-		main.on('accelTap', function(e) {
-			var data_old = data.notifications[0].subject;
-			ajax({
-				url:'http://proxer.me/notifications?format=json&s=news&p=1',
-				type: 'json'
-			},function(data) {
-				main.items(0, itemgenerator(data, data_old));
+function request(){
+		ajax({
+			url:'http://proxer.me/notifications?format=json&s=news&p=1',
+			type: 'json'
+		},
+		function(data) {
+			if(data.error !== 0){
+				show([{title: 'Fehler', subtitle: data.msg }]);
+			} else {
+				var items = [];
+				for(var i = 0; i < data.notifications.length; i++){
+//					console.log('run: ' + i);
+					items.push({
+						title: data.notifications[i].subject, 
+						subtitle: data.notifications[i].description
+					});
+				}
+//				console.log(items.length + ' items: ' + items);
+//				items.push({title: 'Load more', subtitle: 'next page'});
+				show(items);
+			}
+			main.on('select', function(e) {
+//				console.log(e.itemIndex);
+				if (e.itemIndex === 0){
+//					console.log('updating');
+					show([{ title: 'Updating...', subtitle: 'downloading news' }], true);
+					request();
+//				} else if (e.itemIndex == (items.length - 1)){
+//					console.log('get new news');
+				} else if (data.error === 0) {
+					var card = new UI.Card();
+					card.title(items[e.itemIndex].title);
+					card.body(items[e.itemIndex].subtitle);
+					card.scrollable(true);
+					card.show();
+				}
 			});
-		});
-		main.on('select', function(e) {
-		var card = new UI.Card();
-		card.title(data.notifications[e.itemIndex].subject);
-		card.body(data.notifications[e.itemIndex].description);
-		card.scrollable(true);
-		card.show();
-	});
-	},
-	function(error) {
-		main.items(0, [{title: 'Keine Verbindung', subtitle: 'News konnten nicht abgerufen werden' }]);
-	}
-);
+		},
+		function(error) {
+//			console.log('rquest_error');
+			show([{ title: 'No Connection', subtitle: '-> No News' }]); //add update funciton!
+			main.on('select', function(e) {
+				if (e.itemIndex === 0){
+					show([{ title: 'Updating...', subtitle: 'downloading news' }], true);
+					request();
+				}
+			});
+		}
+	);
+}
 
-Accel.init();
+main.show();
 
+request();
